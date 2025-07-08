@@ -8,6 +8,8 @@
 
 import json
 import threading
+import random # Added for random seek
+import os # Added for path comparison
 
 import xbmc
 import xbmcgui
@@ -131,9 +133,12 @@ class Screensaver(xbmcgui.WindowXML):
 
     def start_playback(self):
         self.playindex = 0
-        self.atv4player.play(self.video_playlist[self.playindex], windowed=True)
+        current_video_path = self.video_playlist[self.playindex]
+        self.atv4player.play(current_video_path, windowed=True)
+        self.apply_random_seek_if_needed(current_video_path)
+
         while self.active and not monitor.abortRequested():
-            monitor.waitForAbort(1)
+            monitor.waitForAbort(0.1) # Shorter wait for more responsive check
             # If we finish playing the video
             if not self.atv4player.isPlaying() and self.active:
                 # Increment the iterator used to access the array or reset to 0
@@ -142,7 +147,45 @@ class Screensaver(xbmcgui.WindowXML):
                 else:
                     self.playindex = 0
                 # Using the updated iterator, start playing the next video
-                self.atv4player.play(self.video_playlist[self.playindex], windowed=True)
+                current_video_path = self.video_playlist[self.playindex]
+                self.atv4player.play(current_video_path, windowed=True)
+                self.apply_random_seek_if_needed(current_video_path)
+
+    def apply_random_seek_if_needed(self, video_path):
+        if addon.getSettingBool("random-seek-local"):
+            extra_folder = addon.getSetting("extra-local-folder")
+            # Check if the video_path starts with the extra_folder path
+            # Normalize paths to account for potential differences (e.g., trailing slashes)
+            if extra_folder and video_path.startswith(os.path.normpath(extra_folder)):
+                xbmc.log(f"[Aerial Screensaver] Random seek enabled for local file: {video_path}", level=xbmc.LOGDEBUG)
+                
+                # Wait for player to be ready, with a timeout
+                for _ in range(50): # Try for up to 5 seconds (50 * 100ms)
+                    if self.atv4player.isPlayingVideo() and self.atv4player.getTotalTime() > 0:
+                        break
+                    xbmc.sleep(100)
+                else:
+                    xbmc.log("[Aerial Screensaver] Player not ready or video duration is 0 for random seek.", level=xbmc.LOGWARNING)
+                    return
+
+                try:
+                    duration = self.atv4player.getTotalTime()
+                    xbmc.log(f"[Aerial Screensaver] Video duration: {duration}s", level=xbmc.LOGDEBUG)
+                    if duration > 10: # Only seek if video is longer than 10 seconds
+                        # Seek to a random point, but not too close to the end (e.g., leave last 5s)
+                        # And not too close to the beginning (e.g., start after first 1s)
+                        seek_end_margin = 5 
+                        if duration <= seek_end_margin * 2: # very short video, play from near start
+                            seek_to = random.randint(1, int(duration) -1 if duration > 1 else 1)
+                        else:
+                            seek_to = random.randint(1, int(duration) - seek_end_margin)
+                        
+                        self.atv4player.seekTime(seek_to)
+                        xbmc.log(f"[Aerial Screensaver] Seeking to {seek_to}s", level=xbmc.LOGDEBUG)
+                    else:
+                        xbmc.log("[Aerial Screensaver] Video too short for random seek.", level=xbmc.LOGDEBUG)
+                except Exception as e:
+                    xbmc.log(f"[Aerial Screensaver] Error during random seek: {e}", level=xbmc.LOGERROR)
 
 
 def run(params=False):
