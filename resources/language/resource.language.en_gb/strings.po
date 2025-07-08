@@ -449,3 +449,7 @@ msgstr ""
 msgctxt "#32134"
 msgid "Use only extra local files"
 msgstr ""
+
+msgctxt "#32135"
+msgid "Start local videos at random time"
+msgstr ""
