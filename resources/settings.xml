@@ -413,6 +413,16 @@
 						</dependency>
 					</dependencies>
 				</setting>
+				<setting id="random-seek-local" type="boolean" label="32135" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="!isempty" setting="extra-local-folder">true</condition>
+						</dependency>
+					</dependencies>
+				</setting>
 				<setting id="enable-checksums" type="boolean" label="32030" help="">
 					<level>0</level>
 					<default>true</default>
