@@ -126,6 +126,29 @@ class AtvPlaylist:
 
             # Now that we're done building the playlist, shuffle and return to the caller
             shuffle(self.playlist)
+
+        # Add files from the extra local folder
+        extra_folder_path = addon.getSetting("extra-local-folder")
+        if extra_folder_path and xbmcvfs.exists(extra_folder_path):
+            try:
+                dirs, files = xbmcvfs.listdir(extra_folder_path)
+                video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.ts', '.m2ts'] # Common video extensions
+                for file in files:
+                    if os.path.splitext(file)[1].lower() in video_extensions:
+                        full_path = os.path.join(extra_folder_path, file)
+                        # Ensure we don't add duplicates if a file from Apple's list is also in the local folder
+                        if full_path not in self.playlist:
+                            self.playlist.append(full_path)
+                            xbmc.log("Added local video to playlist: {}".format(full_path), level=xbmc.LOGDEBUG)
+                if self.playlist: # Shuffle again if we added local files
+                    shuffle(self.playlist)
+            except Exception as e:
+                xbmc.log("Error accessing or listing files in extra local folder: {}. Error: {}".format(extra_folder_path, e), level=xbmc.LOGERROR)
+
+        if self.playlist:
             return self.playlist
         else:
+            # If after all attempts the playlist is empty, return None.
+            # This could happen if no Apple videos were found/selected and no valid local folder/videos were provided.
+            xbmc.log("Playlist is empty after attempting to populate from all sources.", level=xbmc.LOGWARNING)
             return None
