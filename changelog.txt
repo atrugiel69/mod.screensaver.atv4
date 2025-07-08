@@ -1,3 +1,6 @@
+v3.0.4 (2025-07-08)
+- Added option for using local videos, different than Aerial
+
 v3.0.3  (2022-01-01)
 - New scenes added (Patagonia, Yosemite, Grand Canyon, Iceland, Scotland)
 - Updated Apple resources.tar entries.json URL
