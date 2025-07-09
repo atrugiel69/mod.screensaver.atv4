@@ -413,10 +413,41 @@
 						</dependency>
 					</dependencies>
 				</setting>
+				<setting id="random-seek-local" type="boolean" label="32135" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="!isempty" setting="extra-local-folder">true</condition>
+						</dependency>
+					</dependencies>
+				</setting>
 				<setting id="enable-checksums" type="boolean" label="32030" help="">
 					<level>0</level>
 					<default>true</default>
 					<control type="toggle"/>
+				</setting>
+				<setting id="extra-local-folder" type="path" label="32133" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<writable>false</writable>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="button" format="path">
+						<heading>32133</heading>
+					</control>
+				</setting>
+				<setting id="only-extra-local-folder" type="boolean" label="32134" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="!isempty" setting="extra-local-folder">true</condition>
+						</dependency>
+					</dependencies>
 				</setting>
 				<setting id="run-downloader" type="action" label="32011" help="">
 					<level>0</level>
