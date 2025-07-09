@@ -171,7 +171,7 @@ class Screensaver(xbmcgui.WindowXML):
                 try:
                     duration = self.atv4player.getTotalTime()
                     xbmc.log(f"[Aerial Screensaver] Video duration: {duration}s", level=xbmc.LOGDEBUG)
-                    if duration > 10: # Only seek if video is longer than 10 seconds
+                    if duration > 900: # Only seek if video is longer than 15 minutes
                         # Seek to a random point, but not too close to the end (e.g., leave last 5s)
                         # And not too close to the beginning (e.g., start after first 1s)
                         seek_end_margin = 5 
