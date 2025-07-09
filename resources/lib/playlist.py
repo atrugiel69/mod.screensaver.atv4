@@ -79,6 +79,33 @@ class AtvPlaylist:
         else:
             xbmc.log("Skipping Apple JSON load due to 'only-extra-local-folder' setting and valid path.", level=xbmc.LOGDEBUG)
 
+    def _scan_directory_recursively(self, base_path):
+        video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.ts', '.m2ts'] # Common video extensions
+        found_videos = []
+        try:
+            dirs, files = xbmcvfs.listdir(base_path)
+            for file_name in files:
+                # Ensure file_name is a string, as listdir can sometimes return unicode
+                if not isinstance(file_name, str):
+                    file_name = file_name.decode('utf-8', 'ignore')
+                if os.path.splitext(file_name)[1].lower() in video_extensions:
+                    # xbmcvfs.listdir returns names, not full paths. Need to join.
+                    # Ensure base_path also doesn't have trailing slash issues with os.join
+                    # However, Kodi paths are usually well-formed with xbmcvfs.
+                    full_path = os.path.join(base_path, file_name)
+                    found_videos.append(full_path)
+            
+            for dir_name in dirs:
+                # Ensure dir_name is a string
+                if not isinstance(dir_name, str):
+                    dir_name = dir_name.decode('utf-8', 'ignore')
+                # Construct full path for subdirectory
+                sub_dir_path = os.path.join(base_path, dir_name)
+                # Recursive call
+                found_videos.extend(self._scan_directory_recursively(sub_dir_path))
+        except Exception as e:
+            xbmc.log(f"Error during recursive scan of {base_path}: {e}", level=xbmc.LOGERROR)
+        return found_videos
 
     def get_playlist_json(self):
         return self.top_level_json
@@ -153,20 +180,18 @@ class AtvPlaylist:
         # This part runs if 'use_only_extra_local' is true, or if it's false and we're mixing.
         extra_folder_path = addon.getSetting("extra-local-folder")
         if extra_folder_path and xbmcvfs.exists(extra_folder_path):
+            xbmc.log(f"Scanning extra local folder (recursively): {extra_folder_path}", level=xbmc.LOGDEBUG)
             try:
-                dirs, files = xbmcvfs.listdir(extra_folder_path)
-                video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.ts', '.m2ts'] # Common video extensions
-                for file in files:
-                    if os.path.splitext(file)[1].lower() in video_extensions:
-                        full_path = os.path.join(extra_folder_path, file)
-                        # Ensure we don't add duplicates if a file from Apple's list is also in the local folder
-                        if full_path not in self.playlist:
-                            self.playlist.append(full_path)
-                            xbmc.log("Added local video to playlist: {}".format(full_path), level=xbmc.LOGDEBUG)
-                if self.playlist: # Shuffle again if we added local files
-                    shuffle(self.playlist)
+                local_videos_found = self._scan_directory_recursively(extra_folder_path)
+                if local_videos_found:
+                    for video_path in local_videos_found:
+                        if video_path not in self.playlist:
+                            self.playlist.append(video_path)
+                            xbmc.log(f"Added local video to playlist: {video_path}", level=xbmc.LOGDEBUG)
+                    if self.playlist: # Shuffle if any videos are present (Apple's or local)
+                        shuffle(self.playlist)
             except Exception as e:
-                xbmc.log("Error accessing or listing files in extra local folder: {}. Error: {}".format(extra_folder_path, e), level=xbmc.LOGERROR)
+                xbmc.log(f"Error scanning or listing files in extra local folder: {extra_folder_path}. Error: {e}", level=xbmc.LOGERROR)
 
         if self.playlist:
             return self.playlist
