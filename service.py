@@ -4,5 +4,5 @@ Its previous functionality for resetting the 'is_locked' setting has been remove
 as the setting itself is no longer used.
 """
 import xbmc
-xbmc.log("[screensaver.atv4] service.py executed (now a placeholder)", level=xbmc.LOGDEBUG)
+xbmc.log("[screensaver.localvideo] service.py executed (now a placeholder)", level=xbmc.LOGDEBUG)
 pass

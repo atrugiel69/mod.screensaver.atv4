@@ -30,7 +30,7 @@ class AtvPlaylist:
         self.playlist = []
         # All logic related to Apple's JSON, force_offline, extra_local_folder_only, etc., is removed.
         # The playlist will be populated solely by local files.
-        xbmc.log("AtvPlaylist initialized for local-only playback.", level=xbmc.LOGDEBUG)
+        xbmc.log("[screensaver.localvideo] AtvPlaylist initialized for local-only playback.", level=xbmc.LOGDEBUG)
 
     def _scan_directory_recursively(self, base_path):
         video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.ts', '.m2ts']  # Common video extensions
@@ -57,7 +57,7 @@ class AtvPlaylist:
                 # Recursive call
                 found_videos.extend(self._scan_directory_recursively(sub_dir_path))
         except Exception as e:
-            xbmc.log(f"Error during recursive scan of {base_path}: {e}", level=xbmc.LOGERROR)
+            xbmc.log(f"[screensaver.localvideo] Error during recursive scan of {base_path}: {e}", level=xbmc.LOGERROR)
         return found_videos
 
     # get_playlist_json is no longer needed as top_level_json is removed.
