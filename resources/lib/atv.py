@@ -15,7 +15,7 @@ import xbmc
 import xbmcgui
 
 from .commonatv import translate, addon, addon_path
-from .offline import offline
+# from .offline import offline # Removed as offline.py was deleted
 from .playlist import AtvPlaylist
 from .trans import ScreensaverTrans
 

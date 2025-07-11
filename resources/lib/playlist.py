@@ -6,24 +6,17 @@
    See LICENSE for more information.
 """
 
-import json
 import os
-import tarfile
 from random import shuffle
-from urllib import request
+# Unused imports removed: json, tarfile, urllib.request
 
 import xbmc
 import xbmcvfs
 
-from .commonatv import addon, addon_path, find_ranked_key_in_dict, compute_block_key_list
+from .commonatv import addon
 
-# Apple's URL of the resources.tar file containing entries.json
-apple_resources_tar_url = "http://sylvan.apple.com/Aerials/resources-15.tar"
-
-# Local temporary save location of the Apple TAR file
-apple_local_tar_path = os.path.join(addon_path, "resources.tar")
-
-# Constants related to Apple video sources are no longer needed.
+# Apple-related constants (apple_resources_tar_url, apple_local_tar_path) removed as they are no longer used.
+# This also resolves the NameError for addon_path as it was only used in apple_local_tar_path definition.
 
 class AtvPlaylist:
     def __init__(self, ):
