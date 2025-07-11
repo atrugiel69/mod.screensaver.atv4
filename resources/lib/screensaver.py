@@ -47,36 +47,21 @@ class ScreensaverPreview(xbmcgui.WindowXMLDialog):
 
 def run():
     if not xbmc.getCondVisibility("Player.HasMedia"):
-        if not addon.getSettingBool("is_locked"):
-            if addon.getSettingBool("show-notifications"):
-                notification(translate(32000), translate(32017))
+        # The 'is_locked' check has been removed.
+        # The settings "show-notifications" and "show-previewwindow" were removed from settings.xml.
+        # For now, we will default to the behavior that was previously under 'else'
+        # (i.e., not showing notifications or preview window, directly running the addon).
+        # This part might need further review if notifications or a preview window are desired
+        # for the local-only screensaver, which would require adding new settings.
 
-            if addon.getSettingBool("show-previewwindow"):
-                # Start window
-                screensaver = ScreensaverPreview(
-                    'screensaver-atv4.xml',
-                    addon_path,
-                    'default',
-                    '',
-                )
-                screensaver.doModal()
-                xbmc.sleep(100)
-                del screensaver
-            else:
-                ScreensaverPreview.ExitMonitor(ScreensaverPreview.runAddon())
-                ScreensaverPreview.send_input()
+        # Defaulting to direct addon run, similar to the old 'else' branch of the 'is_locked' check,
+        # and also similar to when 'show-previewwindow' was false.
+        ScreensaverPreview.ExitMonitor(ScreensaverPreview.runAddon())
+        ScreensaverPreview.send_input()
 
-        else:
-            # Transparent placeholder
-            trans = ScreensaverTrans(
-                'screensaver-atv4-trans.xml',
-                addon_path,
-                'default',
-                '',
-            )
-            trans.doModal()
-            xbmc.sleep(100)
-            del trans
+        # The transparent placeholder logic (old 'else' of 'is_locked') is removed for now,
+        # as 'is_locked' itself is removed. If a scenario where a transparent placeholder
+        # is needed arises, it would have to be re-evaluated.
     else:
         # Just call deactivate
         ScreensaverPreview.send_input()

@@ -23,7 +23,7 @@
 					<control type="toggle"/>
 					<dependencies>
 						<dependency type="visible">
-							<condition operator="!isempty" setting="extra-local-folder">true</condition>
+							<condition setting="extra-local-folder" operator="!eq"></condition>
 						</dependency>
 					</dependencies>
 				</setting>
