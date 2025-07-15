@@ -25,11 +25,15 @@ monitor = xbmc.Monitor()
 class Screensaver(xbmcgui.WindowXML):
 
     def __init__(self, *args, **kwargs):
-        # DPMS logic removed
+        self.DPMStime = json.loads(xbmc.executeJSONRPC(
+            '{"jsonrpc":"2.0","method":"Settings.GetSettingValue","params":{"setting":"powermanagement.displaysoff"},"id":2}'))[
+                            'result']['value'] * 60
+        self.isDPMSactive = bool(self.DPMStime > 0)
         self.active = True
         self.atv4player = None
         self.video_playlist = AtvPlaylist().compute_playlist_array()
-        xbmc.log("[screensaver.localvideo] Screensaver class initialized", level=xbmc.LOGDEBUG)
+        xbmc.log(msg=f"[screensaver.localvideo] kodi dpms time: {self.DPMStime}", level=xbmc.LOGDEBUG)
+        xbmc.log(msg=f"[screensaver.localvideo] kodi dpms active: {self.isDPMSactive}", level=xbmc.LOGDEBUG)
 
 
     def onInit(self):
@@ -42,11 +46,64 @@ class Screensaver(xbmcgui.WindowXML):
 
             # Start player thread
             threading.Thread(target=self.start_playback).start()
-            # DPMS checking loop removed
+
+            # DPMS logic
+            self.max_allowed_time = None
+
+            if self.isDPMSactive and addon.getSettingInt("check-dpms") == 1:
+                self.max_allowed_time = self.DPMStime
+
+            elif addon.getSettingInt("check-dpms") == 2:
+                self.max_allowed_time = addon.getSettingInt("manual-dpms") * 60
+
+            xbmc.log(msg=f"[screensaver.localvideo] check dpms: {addon.getSetting('check-dpms')}",
+                     level=xbmc.LOGDEBUG)
+            xbmc.log(msg=f"[screensaver.localvideo] before supervision: {self.max_allowed_time}",
+                     level=xbmc.LOGDEBUG)
+
+            if self.max_allowed_time:
+                delta = 0
+                while self.active:
+                    if delta >= self.max_allowed_time:
+                        self.activateDPMS()
+                        break
+                    monitor.waitForAbort(1)
+                    delta += 1
         else:
             self.novideos()
 
-    # activateDPMS method removed
+    def activateDPMS(self):
+        xbmc.log(msg="[screensaver.localvideo] Manually activating DPMS!", level=xbmc.LOGDEBUG)
+        self.active = False
+
+        # Take action on the video
+        enable_window_placeholder = False
+        if addon.getSettingInt("dpms-action") == 0:
+            self.atv4player.pause()
+        else:
+            self.clearAll()
+            enable_window_placeholder = True
+
+        if addon.getSettingBool("toggle-displayoff") or addon.getSettingBool("toggle-cecoff"):
+            monitor.waitForAbort(1)
+
+        if addon.getSettingBool("toggle-displayoff"):
+            try:
+                xbmc.executebuiltin('ToggleDPMS')
+            except Exception as e:
+                xbmc.log(msg=f"[screensaver.localvideo] Failed to toggle DPMS: {e}",
+                         level=xbmc.LOGDEBUG)
+
+        if addon.getSetting("toggle-cecoff") == "true":
+            try:
+                xbmc.executebuiltin('CECStandby')
+            except Exception as e:
+                xbmc.log(msg=f"[screensaver.localvideo] Failed to toggle device off via CEC: {e}",
+                         level=xbmc.LOGDEBUG)
+
+        # Enable placeholder window
+        if enable_window_placeholder:
+            self.toTransparent()
 
     def novideos(self):
         self.setProperty("screensaver-atv4-loading", "false")
