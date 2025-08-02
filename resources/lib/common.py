@@ -6,7 +6,11 @@
    See LICENSE for more information.
 """
 
-from resources.lib.commonatv import addon
+import xbmcaddon
 
-# set locked setting back to false on startup just in case kodi had crashed during playback
-addon.setSettingBool("is_locked", False)
+addon = xbmcaddon.Addon()
+addon_path = addon.getAddonInfo("path")
+
+
+def translate(text):
+    return addon.getLocalizedString(text)
