@@ -19,6 +19,23 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
+                <setting id="random-seek-duration" type="integer" label="32008" help="32009">
+                    <level>0</level>
+                    <default>2</default>
+                    <constraints>
+                        <minimum>0</minimum>
+                        <step>1</step>
+                        <maximum>60</maximum>
+                    </constraints>
+                    <control type="slider" format="integer">
+                        <popup>false</popup>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible">
+                            <condition operator="is" setting="random-seek-local">true</condition>
+                        </dependency>
+                    </dependencies>
+                </setting>
 			</group>
 		</category>
 	</section>

@@ -44,3 +44,11 @@ msgstr ""
 msgctxt "#32007"
 msgid "No videos found. Please configure the video folder in the addon settings."
 msgstr ""
+
+msgctxt "#32008"
+msgid "Min. duration for random seek (mins)"
+msgstr ""
+
+msgctxt "#32009"
+msgid "Videos shorter than this will start from the beginning."
+msgstr ""

@@ -77,7 +77,8 @@ class Screensaver(xbmcgui.WindowXML):
 
             try:
                 duration = self.player.getTotalTime()
-                if duration > 120:  # Only seek if video is longer than 2 minutes
+                min_duration_for_seek = addon.getSettingInt("random-seek-duration") * 60
+                if duration > min_duration_for_seek:
                     seek_to = random.randint(1, int(duration) - 30) # Seek somewhere in the middle
                     self.player.seekTime(seek_to)
                     xbmc.log(f"[Video Screensaver] Seeking to {seek_to}s", level=xbmc.LOGDEBUG)
