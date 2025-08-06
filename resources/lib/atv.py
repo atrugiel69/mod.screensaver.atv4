@@ -12,7 +12,7 @@ import xbmc
 import xbmcgui
 
 from .common import addon, addon_path, translate
-from .playlist import AtvPlaylist
+from . import playlist
 
 monitor = xbmc.Monitor()
 
@@ -70,7 +70,7 @@ class Screensaver(xbmcgui.WindowXML):
 
     def __init__(self, *args, **kwargs):
         self.player = None
-        self.video_playlist = AtvPlaylist().compute_playlist_array()
+        self.video_playlist = playlist.get_playlist()
 
     def onInit(self):
         self.setProperty("screensaver-video-loading", "true")
