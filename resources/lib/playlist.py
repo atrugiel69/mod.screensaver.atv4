@@ -20,6 +20,7 @@ class AtvPlaylist:
         self.playlist = []
 
     def _scan_directory_recursively(self, base_path):
+        xbmc.log(f"[Video Screensaver] Scanning directory: {base_path}", level=xbmc.LOGDEBUG)
         video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.ts', '.m2ts']  # Common video extensions
         found_videos = []
         try:
@@ -30,6 +31,7 @@ class AtvPlaylist:
                     file_name = file_name.decode('utf-8', 'ignore')
                 if os.path.splitext(file_name)[1].lower() in video_extensions:
                     full_path = os.path.join(base_path, file_name)
+                    xbmc.log(f"[Video Screensaver] Found video file: {full_path}", level=xbmc.LOGDEBUG)
                     found_videos.append(full_path)
 
             for dir_name in dirs:
@@ -45,6 +47,7 @@ class AtvPlaylist:
         return found_videos
 
     def compute_playlist_array(self):
+        xbmc.log("[Video Screensaver] Computing playlist...", level=xbmc.LOGDEBUG)
         extra_folder_path = addon.getSetting("extra-local-folder")
         if extra_folder_path and xbmcvfs.exists(extra_folder_path):
             xbmc.log(f"Scanning local folder (recursively): {extra_folder_path}", level=xbmc.LOGDEBUG)
@@ -52,7 +55,7 @@ class AtvPlaylist:
                 self.playlist = self._scan_directory_recursively(extra_folder_path)
                 if self.playlist:
                     shuffle(self.playlist)
-                    xbmc.log(f"Found {len(self.playlist)} videos.", level=xbmc.LOGDEBUG)
+                    xbmc.log(f"Found {len(self.playlist)} videos. Playlist: {self.playlist}", level=xbmc.LOGDEBUG)
             except Exception as e:
                 xbmc.log(f"Error scanning or listing files in local folder: {extra_folder_path}. Error: {e}",
                          level=xbmc.LOGERROR)
