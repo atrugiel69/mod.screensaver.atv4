@@ -48,21 +48,28 @@ class Screensaver(xbmcgui.WindowXML):
         self.clearAll()
 
     def start_playback(self):
+        xbmc.log("[Video Screensaver] Starting playback loop.", level=xbmc.LOGDEBUG)
         play_index = 0
         current_video_path = self.video_playlist[play_index]
+        xbmc.log(f"[Video Screensaver] Playing first video: {current_video_path}", level=xbmc.LOGDEBUG)
         self.player.play(current_video_path, windowed=True)
         self.apply_random_seek_if_needed(current_video_path)
 
         while self.active and not monitor.abortRequested():
             monitor.waitForAbort(0.1)
-            if not self.player.isPlaying() and self.active:
+            is_playing = self.player.isPlaying()
+            xbmc.log(f"[Video Screensaver] In loop. isPlaying(): {is_playing}, self.active: {self.active}", level=xbmc.LOGDEBUG)
+            if not is_playing and self.active:
+                xbmc.log("[Video Screensaver] Player is not playing, advancing to next video.", level=xbmc.LOGDEBUG)
                 if play_index < len(self.video_playlist) - 1:
                     play_index += 1
                 else:
                     play_index = 0
                 current_video_path = self.video_playlist[play_index]
+                xbmc.log(f"[Video Screensaver] Playing next video: {current_video_path}", level=xbmc.LOGDEBUG)
                 self.player.play(current_video_path, windowed=True)
                 self.apply_random_seek_if_needed(current_video_path)
+        xbmc.log("[Video Screensaver] Exited playback loop.", level=xbmc.LOGDEBUG)
 
     def apply_random_seek_if_needed(self, video_path):
         if addon.getSettingBool("random-seek-local"):
