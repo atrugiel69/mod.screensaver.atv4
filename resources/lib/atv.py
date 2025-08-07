@@ -113,7 +113,7 @@ class Screensaver(xbmcgui.WindowXML):
 def run(params=False):
     if not params:
         screensaver = Screensaver(
-            'screensaver-atv4.xml',
+            'screensaver-video.xml',
             addon_path,
             'default',
             '',

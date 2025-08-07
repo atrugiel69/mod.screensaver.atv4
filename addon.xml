@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="screensaver.atv4" name="Video Screensaver" version="5.0.0" provider-name="enen92">
+<addon id="screensaver.localvideos" name="Local Video Screensaver" version="1.0.0" provider-name="atrugiel69">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0"/>
 	</requires>
