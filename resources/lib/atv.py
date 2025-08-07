@@ -44,7 +44,6 @@ class Screensaver(xbmcgui.WindowXML):
         play_index = 0
         current_video_path = self.video_playlist[play_index]
         self.player.play(current_video_path, windowed=True)
-        self.apply_random_seek_if_needed(current_video_path)
 
         while self.active and not monitor.abortRequested():
             monitor.waitForAbort(0.1) # Shorter wait for more responsive check
