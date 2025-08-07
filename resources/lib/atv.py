@@ -66,6 +66,9 @@ class Screensaver(xbmcgui.WindowXML):
             self.playback_ended_event.wait()
             self.playback_ended_event.clear()
 
+            if not self.active:
+                break
+
     def apply_random_seek_if_needed(self, video_path):
         if addon.getSettingBool("random-seek-local"):
             # Wait for player to be ready, with a timeout
