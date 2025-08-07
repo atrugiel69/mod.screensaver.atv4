@@ -18,22 +18,11 @@ from . import playlist
 monitor = xbmc.Monitor()
 
 
-class MyPlayer(xbmc.Player):
-    def __init__(self, playback_ended_event, *args, **kwargs):
-        super(MyPlayer, self).__init__(*args, **kwargs)
-        self.playback_ended_event = playback_ended_event
-
-    def onPlayBackEnded(self):
-        xbmc.log("[Video Screensaver] Playback ended.", level=xbmc.LOGDEBUG)
-        self.playback_ended_event.set()
-
-
 class Screensaver(xbmcgui.WindowXML):
 
     def __init__(self, *args, **kwargs):
         self.player = None
         self.video_playlist = playlist.get_playlist()
-        self.playback_ended_event = threading.Event()
         self.playback_thread = None
         self.active = True
 
@@ -43,31 +32,33 @@ class Screensaver(xbmcgui.WindowXML):
 
         if self.video_playlist:
             self.setProperty("screensaver-video-loading", "false")
-            self.player = MyPlayer(self.playback_ended_event)
-            self.playback_thread = threading.Thread(target=self.playback_loop)
+            self.player = xbmc.Player()
+            self.playback_thread = threading.Thread(target=self.start_playback)
             self.playback_thread.start()
         else:
             self.setProperty("screensaver-video-loading", "false")
             self.getControl(32503).setLabel(translate(32007))
             self.getControl(32503).setVisible(True)
 
-    def playback_loop(self):
-        play_index = -1
-        while self.active:
-            if play_index < len(self.video_playlist) - 1:
-                play_index += 1
-            else:
-                play_index = 0
-            current_video_path = self.video_playlist[play_index]
-            xbmc.log(f"[Video Screensaver] Playing video: {current_video_path}", level=xbmc.LOGDEBUG)
-            self.player.play(current_video_path, windowed=True)
-            self.apply_random_seek_if_needed(current_video_path)
+    def start_playback(self):
+        play_index = 0
+        current_video_path = self.video_playlist[play_index]
+        self.player.play(current_video_path, windowed=True)
+        self.apply_random_seek_if_needed(current_video_path)
 
-            self.playback_ended_event.wait()
-            self.playback_ended_event.clear()
-
-            if not self.active:
-                break
+        while self.active and not monitor.abortRequested():
+            monitor.waitForAbort(0.1) # Shorter wait for more responsive check
+            # If we finish playing the video
+            if not self.player.isPlaying() and self.active:
+                # Increment the iterator used to access the array or reset to 0
+                if play_index < len(self.video_playlist) - 1:
+                    play_index += 1
+                else:
+                    play_index = 0
+                # Using the updated iterator, start playing the next video
+                current_video_path = self.video_playlist[play_index]
+                self.player.play(current_video_path, windowed=True)
+                self.apply_random_seek_if_needed(current_video_path)
 
     def apply_random_seek_if_needed(self, video_path):
         if addon.getSettingBool("random-seek-local"):
@@ -94,7 +85,6 @@ class Screensaver(xbmcgui.WindowXML):
         self.active = False
         if self.player:
             self.player.stop()
-        self.playback_ended_event.set() # Wake up the thread so it can exit
         if self.playback_thread:
             self.playback_thread.join()
         self.close()
